@@ -181,6 +181,34 @@ All pushed to `origin/main`.
 
 ---
 
+### Nana Re-Analysis (OKX Enhanced)
+
+**Re-analyzed using onchainos OKX memepump API** to get accurate metrics.
+
+**OKX Data:**
+- **Top 10 %:** 13.7% (of total supply) — low concentration
+- **Fresh wallets:** 6.05% (~120 wallets) — slightly elevated but not epidemic
+- **Bundlers:** 0.92% — very low
+- **Dev holdings:** 0% ✅
+- **Total holders:** 1,973 — broad distribution
+- **Bonding curve:** 99.6% — fully migrated to Raydium
+- **Social:** X links present, no Telegram
+- **Volume (1h):** $277K
+- **MC:** $364K
+
+**Risk Verdict:** ⚠️ **MEDIUM** (not extreme)
+
+**Why RPC was wrong:**
+- RPC showed Top 5 = 51.9% (of top 10 sum) → extreme
+- Without total supply, percentages are misleading
+- OKX revealed actual top 10 is only 13.7% of total → healthy distribution
+
+**Conclusion:** OKX data prevented false positive. Nana is not an obvious scam despite fresh top holder. Still caution due to Pump.fun origin, but distribution is sound.
+
+Report: `Nana_BWJ7zJauzata_okx_report.html`
+
+---
+
 ## 2026-03-05 System Status & Monitoring
 
 **Date**: March 5, 2026, 19:16 GMT+8

@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# Universal Token Analyzer Script
-# Supports Solana (via QuickNode/Helius) and Base (via BaseScan scraping)
-# Usage: ./analyze-token.sh <TOKEN_ADDRESS> [--chain solana|base]
+# Universal Token Analyzer (with OKX integration)
+# Supports Solana (Helius + OKX), Base (BaseScan), BSC (BscScan)
 
 # Configuration
 QUICKNODE_SOLANA_ENDPOINT="${QUICKNODE_SOLANA_ENDPOINT:-}"
@@ -18,7 +17,7 @@ NC='\033[0m'
 
 # Help
 if [ -z "$1" ] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-    echo -e "${CYAN}Universal Token Analyzer${NC}"
+    echo -e "${CYAN}Universal Token Analyzer (OKX Enhanced)${NC}"
     echo ""
     echo "Usage: $0 <TOKEN_ADDRESS> [--chain solana|base|bsc]"
     echo ""
@@ -27,9 +26,11 @@ if [ -z "$1" ] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
     echo "  $0 0x5bdc2d52adf52e7c510e17a79310a45d80d14b07 --chain base"
     echo "  $0 0xACEF48622c189ffAdB7E697b62d7656a8cfD3d67 --chain bsc"
     echo ""
-    echo "Environment variables:"
-    echo "  QUICKNODE_SOLANA_ENDPOINT - your Solana QuickNode endpoint URL"
-    echo "  HELIUS_SOLANA_ENDPOINT   - your Helius endpoint (has default)"
+    echo "Features:"
+    echo "  - Solana: Tries OKX memepump API (accurate total supply %)"
+    echo "            Falls back to Helius RPC if OKX unavailable"
+    echo "  - Base: BaseScan scraping"
+    echo "  - BSC: BscScan scraping"
     echo ""
     exit 0
 fi
@@ -67,7 +68,6 @@ if [ ! -z "$DEX_DATA" ]; then
     NAME=$(echo $DEX_DATA | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
-# Try top-level token symbol first, then fallback to first pair baseToken
 symbol = d.get('token',{}).get('symbol')
 if not symbol:
     pairs = d.get('pairs',[])
@@ -77,7 +77,6 @@ print(symbol or 'Unknown')" 2>/dev/null)
     MC=$(echo $DEX_DATA | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
-# MarketCap may be in quoteToken or in first pair
 mc = d.get('quoteToken',{}).get('marketCap')
 if not mc or mc == 'None':
     pairs = d.get('pairs',[])
@@ -105,10 +104,8 @@ print(vol or 'Unknown')" 2>/dev/null)
     
     # CoinGecko fallback if DexScreener missing price or volume
     if [ "$PRICE" = "Unknown" ] || [ "$VOLUME" = "Unknown" ]; then
-        # Fetch CoinGecko data with token address as provided
         CG_URL="https://api.coingecko.com/api/v3/simple/token_price/solana?contract_addresses=$TOKEN&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true"
         CG_RESP=$(curl -s "$CG_URL")
-        # Test if valid JSON with token data
         if echo "$CG_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(1 if '$TOKEN' in d else 0)" 2>/dev/null | grep -q 1; then
             if [ "$PRICE" = "Unknown" ]; then
                 PRICE=$(echo "$CG_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('$TOKEN',{}).get('usd','Unknown'))" 2>/dev/null)
@@ -131,7 +128,7 @@ if [ "$CHAIN" = "solana" ]; then
     echo -e "${CYAN}🔍 Fetching Solana holder data...${NC}"
     echo ""
     
-    # Determine endpoint
+    # Determine RPC endpoint
     RPC_ENDPOINT=""
     if [ -n "$QUICKNODE_SOLANA_ENDPOINT" ]; then
         RPC_ENDPOINT="$QUICKNODE_SOLANA_ENDPOINT"
@@ -141,11 +138,21 @@ if [ "$CHAIN" = "solana" ]; then
         echo "Using Helius endpoint (set QUICKNODE_SOLANA_ENDPOINT for QuickNode)"
     fi
     
-    # Get holder data
-    HOLDER_RESPONSE=$(curl -s "$RPC_ENDPOINT" \
-        -X POST \
-        -H "Content-Type: application/json" \
-        -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getTokenLargestAccounts\",\"params\":[\"$TOKEN\",{\"limit\":10,\"commitment\":\"finalized\"}]}" 2>/dev/null)
+    # Try OKX memepump API first
+    echo "→ Checking OKX memepump API..."
+    OKX_RESPONSE=$(curl -s --compressed "https://web3.okx.com/api/v6/dex/market/memepump/tokenDetails?chainIndex=501&tokenContractAddress=$TOKEN" 2>/dev/null)
+    
+    if echo "$OKX_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d.get('ok') else 1)" 2>/dev/null; then
+        USE_OKX=true
+        echo "✅ OKX memepump API: enhanced data (accurate total supply context)"
+    else
+        USE_OKX=false
+        echo "⚠️  OKX unavailable, using RPC (percentages relative to top 10 only)"
+        HOLDER_RESPONSE=$(curl -s "$RPC_ENDPOINT" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getTokenLargestAccounts\",\"params\":[\"$TOKEN\",{\"limit\":10,\"commitment\":\"finalized\"}]}" 2>/dev/null)
+    fi
 
     # Mint & Freeze Authority Check
     echo ""
@@ -185,41 +192,96 @@ if [ "$CHAIN" = "solana" ]; then
     fi
     echo ""
 
-    # Creator Wallet Age Check
-    echo -e "${YELLOW}👴 CREATOR WALLET AGE (Top Holder)${NC}"
-    TOP_HOLDER=$(echo "$HOLDER_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); v=d.get('result',{}).get('value',[]); print(v[0]['address'] if v else '')" 2>/dev/null)
-    if [ -n "$TOP_HOLDER" ]; then
-        SIG_RESP=$(curl -s "$RPC_ENDPOINT" \
-            -X POST \
-            -H "Content-Type: application/json" \
-            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSignaturesForAddress\",\"params\":[\"$TOP_HOLDER\",{\"limit\":1}]}" 2>/dev/null)
-        BLOCK_TIME=$(echo "$SIG_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); s=d.get('result',[{}])[0]; print(s.get('blockTime',''))" 2>/dev/null)
-        if [ -n "$BLOCK_TIME" ] && [ "$BLOCK_TIME" != "None" ]; then
-            AGE_H=$(( ( $(date +%s) - BLOCK_TIME ) / 3600 ))
-            if [ $AGE_H -lt 48 ]; then
-                echo -e "  ${RED}🆕 Top holder wallet is FRESH (${AGE_H}h old)${NC}"
+    # If OKX succeeded, display its data and skip RPC path
+    if [ "$USE_OKX" = true ]; then
+        echo -e "${CYAN}📊 OKX Memepump Data (accurate total supply context):${NC}"
+        echo "$OKX_RESPONSE" | python3 -c "
+import sys,json
+d=json.load(sys.stdin).get('data',{})
+tags=d.get('tags',{})
+print(f\"Token: {d.get('symbol','?')} ({d.get('name','?')})\")
+print(f\"MC: \${d.get('market',{}).get('marketCapUsd','?')}\")
+print(f\"1h Volume: \${d.get('market',{}).get('volumeUsd1h','?')}\")
+print(f\"Total Holders: {tags.get('totalHolders','?')}\")
+print(f\"Bonding Curve: {d.get('bondingPercent','?')}%\")
+print(f\"Top 10 %: {tags.get('top10HoldingsPercent','?')}%\")
+print(f\"Fresh Wallets %: {tags.get('freshWalletsPercent','?')}%\")
+print(f\"Bundlers %: {tags.get('bundlersPercent','?')}%\")
+print(f\"Dev Holdings %: {tags.get('devHoldingsPercent','?')}%\")
+print(f\"Snipers %: {tags.get('snipersPercent','?')}%\")
+" 2>/dev/null
+        echo ""
+        
+        echo -e "${YELLOW}🌐 Social Links:${NC}"
+        echo "$OKX_RESPONSE" | python3 -c "
+import sys,json
+d=json.load(sys.stdin).get('data',{})
+s=d.get('social',{})
+if s.get('website'): print('  Website:', s['website'])
+if s.get('x'): print('  X/Twitter:', s['x'])
+if s.get('telegram'): print('  Telegram:', s['telegram'])
+if s.get('communityTakeover'): print('  Community Takeover: Yes')
+if not any(s.values()): print('  None found')
+" 2>/dev/null
+        echo ""
+        
+        echo -e "${YELLOW}⚠️  Risk Indicators (from OKX tags):${NC}"
+        echo "$OKX_RESPONSE" | python3 -c "
+import sys,json
+d=json.load(sys.stdin).get('data',{})
+t=d.get('tags',{})
+top10=float(t.get('top10HoldingsPercent',0))
+fresh=float(t.get('freshWalletsPercent',0))
+bundlers=float(t.get('bundlersPercent',0))
+dev=float(t.get('devHoldingsPercent',0))
+flags=[]
+if top10 > 30:
+    flags.append(f'🔴 High concentration (top10={top10:.1f}%)')
+if fresh > 5:
+    flags.append(f'🔴 Fresh wallets elevated ({fresh:.1f}%)')
+if bundlers > 2:
+    flags.append(f'🔴 Bundler activity ({bundlers:.1f}%)')
+if dev > 10:
+    flags.append(f'🔴 Dev holdings high ({dev:.1f}%)')
+if flags:
+    for f in flags: print(f'  {f}')
+else:
+    print('  ✅ No major red flags from OKX data')
+" 2>/dev/null
+        echo ""
+    else
+        # RPC path: creator wallet age check
+        echo -e "${YELLOW}👴 CREATOR WALLET AGE (Top Holder)${NC}"
+        TOP_HOLDER=$(echo "$HOLDER_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); v=d.get('result',{}).get('value',[]); print(v[0]['address'] if v else '')" 2>/dev/null)
+        if [ -n "$TOP_HOLDER" ]; then
+            SIG_RESP=$(curl -s "$RPC_ENDPOINT" \
+                -X POST \
+                -H "Content-Type: application/json" \
+                -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSignaturesForAddress\",\"params\":[\"$TOP_HOLDER\",{\"limit\":1}]}" 2>/dev/null)
+            BLOCK_TIME=$(echo "$SIG_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); s=d.get('result',[{}])[0]; print(s.get('blockTime',''))" 2>/dev/null)
+            if [ -n "$BLOCK_TIME" ] && [ "$BLOCK_TIME" != "None" ]; then
+                AGE_H=$(( ( $(date +%s) - BLOCK_TIME ) / 3600 ))
+                if [ $AGE_H -lt 48 ]; then
+                    echo -e "  ${RED}🆕 Top holder wallet is FRESH (${AGE_H}h old)${NC}"
+                else
+                    echo -e "  ${GREEN}✅ Top holder wallet age: ${AGE_H}h${NC}"
+                fi
             else
-                echo -e "  ${GREEN}✅ Top holder wallet age: ${AGE_H}h${NC}"
+                echo -e "  ${YELLOW}⚠️  Could not determine age (no txs or API limit)${NC}"
             fi
         else
-            echo -e "  ${YELLOW}⚠️  Could not determine age (no txs or API limit)${NC}"
+            echo -e "  ${YELLOW}⚠️  No top holder data${NC}"
         fi
-    else
-        echo -e "  ${YELLOW}⚠️  No top holder data${NC}"
-    fi
-    echo ""
-    
-    if echo "$HOLDER_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if 'result' in d else 1)" 2>/dev/null; then
-        # Success - parse and display
-        echo "$HOLDER_RESPONSE" | python3 -c "
+        echo ""
+        
+        if echo "$HOLDER_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if 'result' in d else 1)" 2>/dev/null; then
+            echo "$HOLDER_RESPONSE" | python3 -c "
 import sys,json
-
 data=json.load(sys.stdin)
 value=data.get('result',{}).get('value',[])
 if not value:
     print('No holder data returned (token may have no holders)')
     sys.exit(0)
-
 total=sum(float(h.get('uiAmount',0)) for h in value)
 print(f'Top 10 holders:')
 print('')
@@ -229,7 +291,6 @@ for i,h in enumerate(value[:10], 1):
     addr=h.get('address','Unknown')
     amount=float(h.get('uiAmount',0))
     pct=(amount/total*100) if total > 0 else 0
-    
     flag=''
     if pct > 50:
         flag='🔴 CRITICAL'
@@ -237,36 +298,35 @@ for i,h in enumerate(value[:10], 1):
         flag='🚨 HIGH'
     elif pct > 10:
         flag='⚠️ MEDIUM'
-    
     print(f'{i:4}  {addr[:18]:18}  {amount:>17,.0f}  {pct:>6.1f}%  {flag}')
 " 2>/dev/null
-        
-        # Concentration metrics
-        TOP1_PCT=$(echo "$HOLDER_RESPONSE" | python3 -c "
+            
+            # Concentration metrics
+            TOP1_PCT=$(echo "$HOLDER_RESPONSE" | python3 -c "
 import sys,json
 data=json.load(sys.stdin)
 value=data.get('result',{}).get('value',[])
 total=sum(float(h.get('uiAmount',0)) for h in value)
 top1=float(value[0].get('uiAmount',0)) if value else 0
 print(round(top1/total*100,1))" 2>/dev/null)
-        
-        TOP5_PCT=$(echo "$HOLDER_RESPONSE" | python3 -c "
+            
+            TOP5_PCT=$(echo "$HOLDER_RESPONSE" | python3 -c "
 import sys,json
 data=json.load(sys.stdin)
 value=data.get('result',{}).get('value',[])
 total=sum(float(h.get('uiAmount',0)) for h in value)
 top5=sum(float(h.get('uiAmount',0)) for h in value[:5])
 print(round(top5/total*100,1))" 2>/dev/null)
-        
-        echo ""
-        echo -e "${YELLOW}📊 CONCENTRATION:${NC}"
-        echo "  Top 1:  ${TOP1_PCT}%"
-        echo "  Top 5:  ${TOP5_PCT}%"
-        echo ""
-        
-        # Bundling check (already added after mint/freeze check)
-        echo -e "${YELLOW}🔗 BUNDLING CHECK (Top 10):${NC}"
-        echo "$HOLDER_RESPONSE" | python3 -c "
+            
+            echo ""
+            echo -e "${YELLOW}📊 CONCENTRATION:${NC}"
+            echo "  Top 1:  ${TOP1_PCT}%"
+            echo "  Top 5:  ${TOP5_PCT}%"
+            echo ""
+            
+            # Bundling check
+            echo -e "${YELLOW}🔗 BUNDLING CHECK (Top 10):${NC}"
+            echo "$HOLDER_RESPONSE" | python3 -c "
 import sys,json
 data=json.load(sys.stdin)
 value=data.get('result',{}).get('value',[])
@@ -282,11 +342,11 @@ for i in range(min(9, len(value)-1)):
     status='✅ BUNDLED' if diff < 1 else f'{diff:.1f}% diff'
     print(f'  Rank {i+1:2} vs {i+2:2}: {status}')
 " 2>/dev/null
-        
-    else
-        echo -e "${RED}❌ Error fetching holder data from Solana RPC${NC}"
-        echo "Check: Endpoint reachable, API key valid, token address correct"
-        exit 1
+        else
+            echo -e "${RED}❌ Error fetching holder data from Solana RPC${NC}"
+            echo "Check: Endpoint reachable, API key valid, token address correct"
+            exit 1
+        fi
     fi
 
 # ========== BASE PATH ==========
@@ -297,69 +357,38 @@ elif [ "$CHAIN" = "base" ]; then
     echo "Attempting to fetch from BaseScan holders table..."
     echo ""
     
-    # Try to fetch the holders HTML table from BaseScan
     HOLDERS_HTML=$(curl -s "https://basescan.org/token/generic-tokenholders2?a=$TOKEN&ps=100&p=1" 2>/dev/null)
     
     if echo "$HOLDERS_HTML" | grep -q "quickExportTokenHolerData"; then
-        # Extract the data array string
         JS_LINE=$(echo "$HOLDERS_HTML" | grep -o "quickExportTokenHolerData = '[^']*'" | head -1)
         
         if [ -n "$JS_LINE" ]; then
-            # Extract the JSON array part (between single quotes)
             JSON_ARRAY=$(echo "$JS_LINE" | sed "s/quickExportTokenHolerData = '//;s/'$//")
             
             if [ -n "$JSON_ARRAY" ]; then
                 echo "$JSON_ARRAY" | python3 -c '
-import json
-import sys
-
-data_str = sys.stdin.read()
-
-try:
-    data = json.loads(data_str)
-except json.JSONDecodeError as e:
-    print(f"Parse error: {e}")
-    sys.exit(1)
-
+import json,sys
+data=json.loads(sys.stdin.read())
+top10=data[:10]
+sum_top10=0
+for row in top10:
+    try: sum_top10+=float(row[3].replace(",",""))
+    except: pass
 print(f"Top 10 holders:")
 print("")
 print("Rank  Address               Amount              % (of top 10 sum)")
 print("----  -------------------  -----------------  -----")
-
-# Compute sum of top 10 for relative percentages
-top10 = data[:10]
-sum_top10 = 0
-for row in top10:
-    qty_str = row[3].replace(",", "")
-    try:
-        qty = float(qty_str)
-        sum_top10 += qty
-    except:
-        continue
-
-for i, row in enumerate(top10, 1):
-    addr = row[1][:18]
-    qty_str = row[3].replace(",", "")
-    try:
-        qty = float(qty_str)
-    except:
-        qty = 0
-    pct = (qty / sum_top10 * 100) if sum_top10 > 0 else 0
+for i,row in enumerate(top10,1):
+    addr=row[1][:18]
+    qty=float(row[3].replace(",","")) if row[3].replace(",","").replace(".","").isdigit() else 0
+    pct=(qty/sum_top10*100) if sum_top10>0 else 0
     print(f"{i:4}  {addr:18}  {qty:>17,.0f}  {pct:>6.1f}%")
-
-# Concentration of top 5 relative to top 10 sum
-if sum_top10 > 0:
-    top5_sum = 0
-    for row in top10[:5]:
-        qty_str = row[3].replace(",", "")
-        try:
-            top5_sum += float(qty_str)
-        except:
-            pass
-    top5_pct = (top5_sum / sum_top10 * 100) if sum_top10 > 0 else 0
-    print("")
+if sum_top10>0:
+    top5_sum=sum(float(row[3].replace(",","")) for row in top10[:5] if row[3].replace(",","").replace(".","").isdigit())
+    top5_pct=(top5_sum/sum_top10*100)
+    print(f"")
     print(f"Top 5 concentration (of top 10): {top5_pct:.1f}%")
-    print("Note: Without total supply, percentages are relative to top 10 sum only.")
+    print(f"Note: Without total supply, percentages are relative to top 10 sum only.")
 ' 2>/dev/null
                 echo ""
                 echo -e "${YELLOW}📊 Note:${NC} Full token supply needed for accurate concentration metrics."
@@ -384,69 +413,38 @@ elif [ "$CHAIN" = "bsc" ]; then
     echo "Attempting to fetch from BscScan holders table..."
     echo ""
     
-    # Try to fetch the holders HTML table from BscScan
     HOLDERS_HTML=$(curl -s "https://bscscan.com/token/generic-tokenholders2?a=$TOKEN&ps=100&p=1" 2>/dev/null)
     
     if echo "$HOLDERS_HTML" | grep -q "quickExportTokenHolerData"; then
-        # Extract the data array string
         JS_LINE=$(echo "$HOLDERS_HTML" | grep -o "quickExportTokenHolerData = '[^']*'" | head -1)
         
         if [ -n "$JS_LINE" ]; then
-            # Extract the JSON array part (between single quotes)
             JSON_ARRAY=$(echo "$JS_LINE" | sed "s/quickExportTokenHolerData = '//;s/'$//")
             
             if [ -n "$JSON_ARRAY" ]; then
                 echo "$JSON_ARRAY" | python3 -c '
-import json
-import sys
-
-data_str = sys.stdin.read()
-
-try:
-    data = json.loads(data_str)
-except json.JSONDecodeError as e:
-    print(f"Parse error: {e}")
-    sys.exit(1)
-
+import json,sys
+data=json.loads(sys.stdin.read())
+top10=data[:10]
+sum_top10=0
+for row in top10:
+    try: sum_top10+=float(row[3].replace(",",""))
+    except: pass
 print(f"Top 10 holders:")
 print("")
 print("Rank  Address               Amount              % (of top 10 sum)")
 print("----  -------------------  -----------------  -----")
-
-# Compute sum of top 10 for relative percentages
-top10 = data[:10]
-sum_top10 = 0
-for row in top10:
-    qty_str = row[3].replace(",", "")
-    try:
-        qty = float(qty_str)
-        sum_top10 += qty
-    except:
-        continue
-
-for i, row in enumerate(top10, 1):
-    addr = row[1][:18]
-    qty_str = row[3].replace(",", "")
-    try:
-        qty = float(qty_str)
-    except:
-        qty = 0
-    pct = (qty / sum_top10 * 100) if sum_top10 > 0 else 0
+for i,row in enumerate(top10,1):
+    addr=row[1][:18]
+    qty=float(row[3].replace(",","")) if row[3].replace(",","").replace(".","").isdigit() else 0
+    pct=(qty/sum_top10*100) if sum_top10>0 else 0
     print(f"{i:4}  {addr:18}  {qty:>17,.0f}  {pct:>6.1f}%")
-
-# Concentration of top 5 relative to top 10 sum
-if sum_top10 > 0:
-    top5_sum = 0
-    for row in top10[:5]:
-        qty_str = row[3].replace(",", "")
-        try:
-            top5_sum += float(qty_str)
-        except:
-            pass
-    top5_pct = (top5_sum / sum_top10 * 100) if sum_top10 > 0 else 0
-    print("")
+if sum_top10>0:
+    top5_sum=sum(float(row[3].replace(",","")) for row in top10[:5] if row[3].replace(",","").replace(".","").isdigit())
+    top5_pct=(top5_sum/sum_top10*100)
+    print(f"")
     print(f"Top 5 concentration (of top 10): {top5_pct:.1f}%")
-    print("Note: Without total supply, percentages are relative to top 10 sum only.")
+    print(f"Note: Without total supply, percentages are relative to top 10 sum only.")
 ' 2>/dev/null
                 echo ""
                 echo -e "${YELLOW}📊 Note:${NC} Full token supply needed for accurate concentration metrics."

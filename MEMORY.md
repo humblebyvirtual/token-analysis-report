@@ -126,6 +126,61 @@ All pushed to `origin/main`.
 
 ---
 
+## 2026-03-09 OKX Integration & WBE Analysis
+
+### OKX Memepump API Integration
+
+**Enhancement to `analyze-token.sh`:**
+- Solana path now **tries OKX API first** before falling back to RPC
+- OKX provides **accurate percentage metrics** (relative to total supply, not just top 10)
+- OKX tags displayed:
+  - `top10HoldingsPercent` — true concentration
+  - `freshWalletsPercent` — % of all fresh wallets
+  - `bundlersPercent` — bundler-held %
+  - `devHoldingsPercent` — founder token ownership
+  - `snipersPercent` — early buyers at launch
+  - `suspectedPhishingWalletPercent`
+- Social links: `website`, `x`, `telegram`, `communityTakeover`
+- Bonding curve %: migration completion status
+- Risk indicators auto-generated from OKX thresholds
+
+**Impact:** Much more accurate risk assessment. Example: WBE showed 61.8% top 5 (RPC, top-10-relative) vs 27.3% (OKX, total supply) — drastically different risk profile.
+
+**Note:** Direct curl to OKX sometimes blocked (region/rate limits). `onchainos` CLI works reliably as alternative.
+
+---
+
+### WBE Token Analysis (Pump.fun)
+
+**CA:** `2SRku5mrTM51MFzVNUwaTEDDjWYidgFY98kgoyFSpump`  
+**Token:** WBE (Whole-Brain Emulation)  
+**MC:** ~$76K (RPC) / ~$68K (OKX)  
+**Chain:** Solana
+
+#### RPC Analysis (without OKX)
+- Top holder: **FRESH (0h old)**
+- Top 5: **61.7%** (of top 10)
+- Bundling detected (1-6% diffs)
+- Risk: **EXTREME** (Fresh Holder Epidemic pattern)
+
+#### OKX Analysis (accurate)
+- Top 10: **27.3%** of total supply (moderate)
+- Fresh wallets: **2.86%** (~24 wallets) — not epidemic
+- Bundlers: **3.32%**
+- Dev holdings: **0%** ✅
+- Total holders: **844**
+- Bonding curve: **99.46%** (fully migrated to Raydium)
+- Social: GitHub + X community (no Telegram)
+- Volume (1h): $122K
+
+**Verdict:** ⚠️ **MEDIUM RISK** — Not an obvious scam, but still Pump.fun origin = high risk. OKX data prevented false extreme classification.
+
+---
+
+**Lesson:** Always verify concentration metrics with total supply context. Our old top-10-relative percentages can be misleading. OKX integration solves this.
+
+---
+
 ## 2026-03-05 System Status & Monitoring
 
 **Date**: March 5, 2026, 19:16 GMT+8

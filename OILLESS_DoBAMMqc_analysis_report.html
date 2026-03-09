@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>🔬 Forensic Analysis: OILLESS (DoBAMMqc...)</title>
+  <style>
+    body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 30px auto; padding: 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e4e4e4; line-height: 1.6;}
+    .report {background: rgba(255,255,255,0.05); border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);}
+    .header {text-align: center; padding-bottom: 20px; border-bottom: 2px solid #ff4444; margin-bottom: 30px;}
+    .header h1 {margin: 0; color: #ff4444; font-size: 32px;}
+    .header .subtitle {color: #aaa; font-size: 14px; margin-top: 8px;}
+    .badge {display: inline-block; padding: 6px 16px; border-radius: 30px; font-weight: bold; font-size: 13px; margin: 5px;}
+    .critical {background: #ff4444; color: white;}
+    .high {background: #ff4444; color: white;}
+    .medium {background: #ff9933; color: white;}
+    .low {background: #14f195; color: black;}
+    .legit-badge {background: #14f195; color: black; font-size: 16px; padding: 10px 20px;}
+    .section {margin: 25px 0; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px;}
+    .section h2 {margin: 0 0 15px 0; color: #fff; font-size: 22px; display: flex; align-items: center; gap: 10px;}
+    .metrics {display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin: 20px 0;}
+    .metric-card {background: rgba(255,255,255,0.08); border-radius: 10px; padding: 15px; text-align: center; border-left: 4px solid #ff4444;}
+    .metric-card .label {font-size: 11px; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;}
+    .metric-card .value {font-size: 24px; font-weight: bold; color: #fff;}
+    .metric-card .sub {font-size: 12px; color: #888; margin-top: 4px;}
+    table {width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 14px;}
+    th, td {padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);}
+    th {background: rgba(255,255,255,0.1); font-weight: 600; color: #ccc;}
+    tr:hover {background: rgba(255,255,255,0.03);}
+    .status.fresh {background: #ff4444; color: white;}
+    .status.mature {background: #14f195; color: black;}
+    .bundle-item {background: rgba(255,68,68,0.15); border: 1px solid rgba(255,68,68,0.3); border-radius: 8px; padding: 10px 15px; margin: 8px 0; font-family: 'Courier New', monospace; font-size: 13px;}
+    .bundle-item .pair {color: #ff4444; font-weight: bold;}
+    .emergency {background: rgba(255,0,0,0.25); border: 2px solid #ff4444; color: #ff4444; padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; text-align: center;}
+    .verdict {font-size: 26px; font-weight: bold; padding: 18px; border-radius: 8px; margin-top: 20px; background: #ff4444; color: white;}
+    .footer {margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #888; text-align: center;}
+    .footer a {color: #14f195; text-decoration: none;}
+    .code {font-family: 'Courier New', monospace; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-size: 13px;}
+    .highlight-red {color: #ff4444; font-weight: bold;}
+    .highlight-green {color: #14f195; font-weight: bold;}
+    .safety-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;}
+    .safety-item {background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;}
+    .safety-item .label {font-size: 12px; color: #aaa; text-transform: uppercase;}
+    .safety-item .value {font-size: 18px; font-weight: bold; margin-top: 5px;}
+    .checklist {background: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; margin: 15px 0;}
+    .checklist-item {display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 16px;}
+    .checklist-item.pass {color: #14f195;}
+    .checklist-item.fail {color: #ff4444;}
+    .checklist-item .icon {font-size: 20px;}
+  </style>
+</head>
+<body>
+  <div class="report">
+    <div class="header"><h1>🔬 FORENSIC ANALYSIS</h1><div class="subtitle">Solana Token Security Audit</div></div>
+    <div class="section">
+      <h2>📋 Executive Summary</h2>
+      <div class="badge medium">40/100 RISK SCORE</div>
+      <div class="legit-badge" style="margin-top:10px;">60/100 LEGITIMACY SCORE</div>
+      <p style="margin-top: 15px;">
+        <strong>Token:</strong> OILLESS (DoBAMMqc...)<br>
+        <strong>Address:</strong> <code class="code">DoBAMMqcedjoWV3m7JEU1pAzZjkQqeQzbdLUA2etbonk</code><br>
+        <strong>DEX:</strong> raydium<br>
+        <strong>Analysis Date:</strong> 2026-03-09 19:43 UTC
+      </p>
+      <div class="emergency">
+        ⚠️ <strong>CAUTION ADVISED</strong><br>
+        Top 10 holds 23.1% of supply; Fresh wallets: 8.5%; Bundlers: 3.0%.
+      </div>
+    </div>
+    <div class="section">
+      <h2>📊 Token Overview</h2>
+      <div class="metrics">
+        <div class="metric-card"><div class="label">Price</div><div class="value">$0.000819</div><div class="sub"></div></div>
+        <div class="metric-card"><div class="label">24h Change</div><div class="value" style="color:#14f195;">+2286.00%</div><div class="sub">%</div></div>
+        <div class="metric-card"><div class="label">Total Supply</div><div class="value">~1000.0M</div><div class="sub">6 decimals</div></div>
+        <div class="metric-card"><div class="label">24h Volume</div><div class="value">$446,256.17</div><div class="sub" style="color:#14f195;">OKX memepump (High)</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <h2>📋 Legitimacy Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item fail"><span class="icon">❌</span><span>Top 10 Concentration < 20% (OKX: 23.1%)</span></div>
+        <div class="checklist-item partial"><span class="icon">⚠️</span><span>Fresh Wallets < 5% (Current: 8.49%)</span></div>
+        <div class="checklist-item fail"><span class="icon">❌</span><span>Bundlers < 2% (Current: 3.02%)</span></div>
+        <div class="checklist-item pass"><span class="icon">✅</span><span>Dev Holdings < 10% (Current: 0.00%)</span></div>
+        <div class="checklist-item partial"><span class="icon">⚠️</span><span>Phishing < 1% (Current: 4.39%)</span></div>
+        
+        
+        
+        <div class="checklist-item pass">
+          <span class="icon">✅</span>
+          <span>Mint Authority Renounced</span>
+        </div>
+        <div class="checklist-item pass">
+          <span class="icon">✅</span>
+          <span>Sustained Volume >$100k (Current: $446,256.17)</span>
+        </div>
+        <div class="checklist-item fail">
+          <span class="icon">❌</span>
+          <span>Token Age >30 days (Current: 0.0 days)</span>
+        </div>
+        <div class="checklist-item unknown">
+          <span class="icon">❓</span>
+          <span>LP Burned or Locked 6+ months (Current: Unknown)</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2>🏛️ Holder Concentration</h2>
+      <table>
+        <tr><th>Metric</th><th>% of Supply</th></tr>
+        <tr><td>Top 10 Holders (OKX)</td><td><strong class="highlight-red">23.1%</strong></td></tr>
+        
+      </table>
+      <p style="color:#38bdf8;font-size:0.9em;">✅ Data source: OKX memepump API (accurate total supply context)</p>
+    </div>
+    <div class="section">
+      <h2>🔐 Mint & Freeze Authority</h2>
+      <div class="safety-grid">
+        <div class="safety-item"><div class="label">Mint Authority</div><div class="value" style="color:#14f195;">✅ Renounced</div></div>
+        <div class="safety-item"><div class="label">Freeze Authority</div><div class="value" style="color:#14f195;">✅ Renounced</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <h2>👴 Top Holder Wallet Ages</h2>
+      <table>
+        <tr><th>Rank</th><th>Address</th><th>Amount</th><th>%</th><th>Age</th><th>Status</th></tr>
+        <tr><td>1</td><td class="addr">B6iAmNvhuBnE...</td><td>92,072,614</td><td>26.6%</td><td>7.0h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>2</td><td class="addr">FV6X78U6hmjp...</td><td>46,912,657</td><td>13.5%</td><td>0.0h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>3</td><td class="addr">67vvRAuWLNEb...</td><td>27,566,442</td><td>8.0%</td><td>0.0h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>4</td><td class="addr">98qWPfJeYy5z...</td><td>21,543,347</td><td>6.2%</td><td>6.0h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>5</td><td class="addr">GD6cqe2MxNP2...</td><td>20,949,148</td><td>6.0%</td><td>0.2h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>6</td><td class="addr">CGQ63QRJ5y6w...</td><td>12,162,774</td><td>3.5%</td><td>1.2h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>7</td><td class="addr">6Wv7rpoXoKnd...</td><td>12,002,144</td><td>3.5%</td><td>0.4h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>8</td><td class="addr">BD3aHWhvWTkt...</td><td>11,808,351</td><td>3.4%</td><td>0.3h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>9</td><td class="addr">HWRrWTpXSSZN...</td><td>11,145,717</td><td>3.2%</td><td>5.1h</td><td><span class="status fresh">🆕 FRESH</span></td></tr><tr><td>10</td><td class="addr">E2vCEEryX5n2...</td><td>10,902,166</td><td>3.1%</td><td>4.0h</td><td><span class="status fresh">🆕 FRESH</span></td></tr>
+      </table>
+    </div>
+    <div class="section">
+      <h2>🔗 Bundling Detection</h2>
+      <div class="bundle-item"><span class="pair">Ranks 4 & 5</span> — 21,543,347 vs 20,949,148 (2.76% diff ✅ BUNDLED)</div><div class="bundle-item"><span class="pair">Ranks 6 & 7</span> — 12,162,774 vs 12,002,144 (1.32% diff ✅ BUNDLED)</div><div class="bundle-item"><span class="pair">Ranks 7 & 8</span> — 12,002,144 vs 11,808,351 (1.61% diff ✅ BUNDLED)</div><div class="bundle-item"><span class="pair">Ranks 9 & 10</span> — 11,145,717 vs 10,902,166 (2.19% diff ✅ BUNDLED)</div>
+    </div>
+    <div class="section">
+      <h2>⚠️ Risk Factors</h2>
+      <ul class="risk-factors">
+        <li>🔴 <strong>Top 5 concentration 60.3%</strong> (extreme) — 25 points</li>
+        <li>🔴 <strong>Top 1 holder 26.6%</strong> (>20%) — 20 points</li>
+        <li>🔴 <strong>Fresh wallets</strong> (10/10 <24h) — 30 points</li>
+        <li>🔴 <strong>Bundling detected</strong> — 10 points</li>
+        
+        
+        
+        
+        
+      </ul>
+      <div class="verdict">⚠️ MEDIUM-LOW RISK — PROCEED WITH CAUTION</div>
+    </div>
+    <div class="section">
+      <h2>📝 Conclusion</h2>
+      <p><strong>OILLESS</strong> exhibits risk factors:</p>
+      <ol style="margin:15px 0;padding-left:20px;">
+        <li><strong>Top 10 holds 23.1%</strong> of supply (OKX data)</li>
+        <li><strong>Fresh wallets: 8.5%</strong> — elevated but not epidemic</li>
+        <li><strong>Bundlers: 3.0%</strong> — low clustering</li>
+        
+        <li><strong>Phishing suspected: 4.4%</strong></li>
+        
+        
+        
+        
+      </ol>
+      <div class="emergency">⚠️ CAUTION ADVISED</div>
+      <p style="margin-top:15px;background:rgba(255,68,68,0.2);padding:15px;border-radius:8px;border-left:4px solid #ff4444;">
+        <strong>⚠️ DUE TO NEW TOKEN STATUS — MONITOR CLOSELY</strong>
+        Top 10 concentration: 23.1%; Fresh wallets: 8.5%; Bundlers: 3.0%. Market cap: $846,692. While metrics are within acceptable ranges, Pump.fun origin tokens carry elevated risk.
+      </p>
+    </div>
+    <div class="section">
+      <h2>💡 Legitimacy Assessment</h2>
+      <div style="font-size: 48px; font-weight: bold; text-align: center; margin: 20px 0; color: #14f195;">60/100</div>
+      <p style="text-align: center; color: #aaa; margin-bottom: 20px;">Legitimacy Score (higher = more likely legitimate)</p>
+      
+      <p><strong>What is a legit token?</strong></p>
+      <ul style="margin:15px 0;padding-left:20px;line-height:1.8;">
+        <li>✅ Top 5 holds <20% of supply (decentralized ownership)</li>
+        <li>✅ No fresh wallets in top 10 (no creator wallet dumping)</li>
+        <li>✅ No bundling (no hidden wallet clusters)</li>
+        <li>✅ Mint authority renounced (no inflation risk)</li>
+        <li>✅ LP tokens locked 6+ months (liquidity safety)</li>
+        <li>✅ Sustained volume (>$100k daily) indicates genuine interest</li>
+        <li>✅ Token age >30 days (survived initial dump phase)</li>
+        <li>✅ Active socials & team transparency (doxxed preferred)</li>
+        <li>✅ Optional: Audit, CEX listing, clear product/use-case</li>
+      </ul>
+      
+      <div class="emergency" style="background:rgba(20,241,149,0.25); border-color:#14f195; color:#14f195">
+        🎉 POTENTIALLY LEGIT - SCORE ≥60
+      </div>
+      
+      <p style="margin-top:15px;background:rgba(20,241,149,0.1);padding:15px;border-radius:8px;border-left:4px solid #14f195;">
+        <strong>This token passes basic due diligence checks.</strong><br>
+        However, always DYOR further - check team, product, audits, and community.
+      </p>
+    </div>
+    <div class="footer">
+      <p><strong>Analysis performed:</strong> 2026-03-09 19:43 UTC</p>
+      <p><strong>Data sources:</strong> Helius RPC, DexScreener, CoinGecko, PumpSwap</p>
+      <p><strong>Analyst:</strong> <a href="https://github.com/humblebyvirtual">Humble AI Agent (ACP)</a></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forensic Report: Sheep (The Righteous Sheep)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; }
+  .container { max-width: 960px; margin: 0 auto; }
+  .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid #475569; }
+  .header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+  .header .symbol { color: #60a5fa; font-size: 1.2rem; }
+  .header .address { color: #94a3b8; font-size: 0.85rem; word-break: break-all; margin-top: 0.5rem; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .card { background: #1e293b; border-radius: 12px; padding: 1.25rem; border: 1px solid #334155; }
+  .card h3 { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .card .value { font-size: 1.5rem; font-weight: 700; }
+  .card .value.green { color: #22c55e; }
+  .card .value.yellow { color: #f59e0b; }
+  .card .value.red { color: #ef4444; }
+  .card .value.blue { color: #60a5fa; }
+  .full-width { grid-column: 1 / -1; }
+  .risk-box { background: linear-gradient(135deg, #f59e0b22, #f59e0b11); border: 1px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .risk-box h2 { color: #f59e0b; font-size: 1.3rem; }
+  .risk-box .score { font-size: 2.5rem; font-weight: 800; color: #f59e0b; float: right; }
+  .risk-items { margin-top: 1rem; clear: both; }
+  .risk-items li { color: #cbd5e1; margin-bottom: 0.4rem; margin-left: 1.5rem; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  table td, table th { padding: 0.6rem 0.5rem; border-bottom: 1px solid #334155; text-align: left; }
+  table th { color: #64748b; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+  table td:first-child { color: #94a3b8; }
+  .badge { padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green { background: #22c55e22; color: #22c55e; }
+  .badge-red { background: #ef444422; color: #ef4444; }
+  .badge-yellow { background: #f59e0b22; color: #f59e0b; }
+  .tx-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
+  .tx-buy { background: #22c55e; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
+  .tx-sell { background: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
+  .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #f1f5f9; }
+  .footer { text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #334155; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="symbol">Sheep</div>
+    <h1>The Righteous Sheep</h1>
+    <div class="address">5dfHpiBxagAKGUMLpCM246qHb8i8gADE3xdpVnDKpump</div>
+    <div style="margin-top:1rem; color:#94a3b8; font-size:0.85rem;">
+      Generated: 2026-03-14 02:14 UTC | Chain: Solana | DEX: pumpswap | Bonding: 99.8%
+    </div>
+  </div>
+
+  <div class="risk-box">
+    <div class="score">40/100</div>
+    <h2>Risk: MEDIUM</h2>
+    <ul class="risk-items">
+      <li>✅ Healthy distribution: Top 10 only 15.3%</li><li>✅ Fresh wallets slightly elevated: 7.2%</li><li>✅ High bundler count: 23 wallets bundled at launch</li><li>✅ No official website or Telegram</li>
+    </ul>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Market Cap</h3><div class="value blue">$371,237</div></div>
+    <div class="card"><h3>Price</h3><div class="value">$0.00043120</div></div>
+    <div class="card"><h3>24h Change</h3><div class="value green">+1064%</div></div>
+    <div class="card"><h3>Liquidity</h3><div class="value">$62,591</div></div>
+    <div class="card"><h3>24h Volume</h3><div class="value">$5,763,706</div></div>
+    <div class="card"><h3>Holders</h3><div class="value">2,463</div></div>
+  </div>
+
+  <div class="card full-width" style="margin-bottom:1.5rem;">
+    <h3>24h Transaction Mix (72,976 total)</h3>
+    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+      <span style="color:#22c55e; font-weight:600;">Buys: 40,050</span>
+      <span style="color:#ef4444; font-weight:600;">Sells: 32,926</span>
+    </div>
+    <div class="tx-bar">
+      <div class="tx-buy" style="width:54.9%">55%</div>
+      <div class="tx-sell" style="width:45.1%">45%</div>
+    </div>
+  </div>
+
+  <h3 class="section-title">🔗 Bundle Analysis</h3>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="card">
+      <h3>Total Bundlers</h3>
+      <div class="value red">23</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">Wallets that bought at launch in coordinated blocks</div>
+    </div>
+    <div class="card">
+      <h3>Bundled Amount</h3>
+      <div class="value">7,830,371 tokens</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">Value: 35.9 SOL (~$5,391)</div>
+    </div>
+    <div class="card">
+      <h3>Bundler ATH %</h3>
+      <div class="value yellow">30.1%</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">% of supply bundlers held at ATH</div>
+    </div>
+    <div class="card">
+      <h3>Bundler Status</h3>
+      <div class="value green">0.6% current</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">Current bundler holdings (OKX tag)</div>
+    </div>
+  </div>
+
+  <h3 class="section-title">👨‍💻 Developer Analysis</h3>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="card">
+      <h3>Dev Holdings</h3>
+      <div class="value green">0.0%</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem; word-break:break-all;">GpTXmkdvrTajqkzX1fBm...</div>
+    </div>
+    <div class="card">
+      <h3>Dev Track Record</h3>
+      <div class="value red">512/19860</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">
+        Rugs: 2.6% | Migrated: 135 | Total launched: 19,860
+      </div>
+    </div>
+  </div>
+
+  <h3 class="section-title">🐋 Holder Distribution (OKX Tags)</h3>
+  <div class="card full-width" style="margin-bottom:1.5rem;">
+    <table>
+      <tr><td>Top 10 Holdings</td><td style="color:#22c55e; font-weight:700;">15.3%</td></tr>
+      <tr><td>Fresh Wallets</td><td style="color:#f59e0b;">7.2%</td></tr>
+      <tr><td>Bundlers (current)</td><td style="color:#22c55e;">0.6%</td></tr>
+      <tr><td>Snipers</td><td style="color:#22c55e;">0.0%</td></tr>
+      <tr><td>Insiders</td><td style="color:#22c55e;">0.0%</td></tr>
+      <tr><td>Phishing Wallets</td><td style="color:#f59e0b;">2.6%</td></tr>
+      <tr><td>Total Holders</td><td>2,463</td></tr>
+    </table>
+  </div>
+
+  <h3 class="section-title">🏦 Liquidity Info</h3>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="card">
+      <h3>Total Liquidity</h3>
+      <div class="value green">$62,591</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">LP: PumpSwap (pumpswap)</div>
+    </div>
+    <div class="card">
+      <h3>LP Composition</h3>
+      <div class="value">357 SOL</div>
+      <div style="color:#94a3b8; font-size:0.85rem; margin-top:0.5rem;">+ ~72,577,690 Sheep tokens</div>
+    </div>
+  </div>
+
+  <h3 class="section-title">🎯 Aped Wallets (Smart Money)</h3>
+  <div class="card full-width" style="margin-bottom:1.5rem; overflow-x:auto;">
+    <table>
+      <tr><th>Wallet</th><th>Type</th><th>Hold %</th><th>Value</th><th>PnL</th></tr>
+      <tr>
+      <td style="font-size:0.85rem;">B3wagQZiZU2hKa5p...</td>
+      <td><span style="background:#a855f733;color:#a855f7;padding:2px 8px;border-radius:99px;font-size:0.75rem;">KOL</span></td>
+      <td>1.09%</td>
+      <td>$4,395</td>
+      <td style="color:#ef4444;">-43.0%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">F5Kni4dThBeJ2BWb...</td>
+      <td><span style="background:#64748b33;color:#64748b;padding:2px 8px;border-radius:99px;font-size:0.75rem;">SMART_MONEY</span></td>
+      <td>0.44%</td>
+      <td>$1,750</td>
+      <td style="color:#22c55e;">+455.7%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">6EDaVsS6enYgJ81t...</td>
+      <td><span style="background:#a855f733;color:#a855f7;padding:2px 8px;border-radius:99px;font-size:0.75rem;">KOL</span></td>
+      <td>0.36%</td>
+      <td>$1,440</td>
+      <td style="color:#22c55e;">+223.7%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">AEeJUPCiGR3yCouk...</td>
+      <td><span style="background:#a855f733;color:#a855f7;padding:2px 8px;border-radius:99px;font-size:0.75rem;">KOL</span></td>
+      <td>0.22%</td>
+      <td>$887</td>
+      <td style="color:#22c55e;">+56.3%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">4WTFXMckuCJ5EjSK...</td>
+      <td><span style="background:#a855f733;color:#a855f7;padding:2px 8px;border-radius:99px;font-size:0.75rem;">KOL</span></td>
+      <td>0.21%</td>
+      <td>$861</td>
+      <td style="color:#22c55e;">+58.0%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">FmWKN36kiu1e4C5d...</td>
+      <td><span style="background:#64748b33;color:#64748b;padding:2px 8px;border-radius:99px;font-size:0.75rem;">SMART_MONEY</span></td>
+      <td>0.16%</td>
+      <td>$638</td>
+      <td style="color:#22c55e;">+18.0%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">A43Epjw2ieEeWBJm...</td>
+      <td><span style="background:#64748b33;color:#64748b;padding:2px 8px;border-radius:99px;font-size:0.75rem;">SMART_MONEY</span></td>
+      <td>0.10%</td>
+      <td>$405</td>
+      <td style="color:#22c55e;">+25.9%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">71pAfN1nJhcLaezS...</td>
+      <td><span style="background:#64748b33;color:#64748b;padding:2px 8px;border-radius:99px;font-size:0.75rem;">SMART_MONEY</span></td>
+      <td>0.08%</td>
+      <td>$311</td>
+      <td style="color:#22c55e;">+18.1%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">A7zDKHLMRGHmMoGD...</td>
+      <td><span style="background:#64748b33;color:#64748b;padding:2px 8px;border-radius:99px;font-size:0.75rem;">SMART_MONEY</span></td>
+      <td>0.07%</td>
+      <td>$300</td>
+      <td style="color:#22c55e;">+129.5%</td>
+    </tr><tr>
+      <td style="font-size:0.85rem;">47JrLBb6GAjoMZff...</td>
+      <td><span style="background:#a855f733;color:#a855f7;padding:2px 8px;border-radius:99px;font-size:0.75rem;">KOL</span></td>
+      <td>0.07%</td>
+      <td>$269</td>
+      <td style="color:#ef4444;">-41.1%</td>
+    </tr>
+    </table>
+  </div>
+
+  <h3 class="section-title">📱 Social & Metadata</h3>
+  <div class="card full-width" style="margin-bottom:1.5rem;">
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+      <span class="badge badge-green">X: ✅</span>
+      <span class="badge badge-red">Telegram: ❌</span>
+      <span class="badge badge-red">Website: ❌</span>
+      <span class="badge badge-green">CTO: ✅</span>
+      <span class="badge badge-green">DexScreener: ✅</span>
+    </div>
+    <table>
+      <tr><td>Created</td><td>2026-03-13 12:28 UTC</td></tr>
+      <tr><td>Creator</td><td style="word-break:break-all; font-size:0.8rem;">GpTXmkdvrTajqkzX1fBmC4BUjSboF9dHgfnqPqj8WAc4</td></tr>
+      <tr><td>Funding Source</td><td style="word-break:break-all; font-size:0.8rem;">DiivwXGNig241DdN1KwXmnmz2C24g7T6HXjVvCXeZpo5</td></tr>
+      <tr><td>Aped Wallets</td><td>29</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>Report by Nodos Forensic Analyzer</p>
+    <p style="margin-top:0.5rem;">⚠️ Not financial advice. Always DYOR.</p>
+  </div>
+</div>
+</body>
+</html>
